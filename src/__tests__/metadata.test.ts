@@ -49,6 +49,26 @@ describe('extractMetadata', () => {
     expect(meta.hasDynamicMetadata).toBe(false);
   });
 
+  test('detects generateMetadata arrow function form', () => {
+    const ast = parseSource(`
+      export const generateMetadata = async () => ({ title: 'Dynamic' });
+      export default function Page() { return <div /> }
+    `);
+    const meta = extractMetadata(ast);
+    expect(meta.hasDynamicMetadata).toBe(true);
+  });
+
+  test('ignores non-exported const named metadata', () => {
+    const ast = parseSource(`
+      export default function Page() {
+        const metadata = { title: 'Local' };
+        return <div />;
+      }
+    `);
+    const meta = extractMetadata(ast);
+    expect(meta.title).toBeNull();
+  });
+
   test('ignores non-string metadata values', () => {
     const ast = parseSource(`
       const computed = 'Title';

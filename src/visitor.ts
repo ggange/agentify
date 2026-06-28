@@ -3,7 +3,6 @@ import * as path from 'path';
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
-import { extractMetadata } from './metadata.js';
 
 export interface ExtractedContent {
   /** true if the page/component fetches data dynamically */
@@ -86,19 +85,44 @@ export async function extractContent(filePath: string): Promise<ExtractedContent
       }
     },
 
-    // 2. export default async arrow assigned to variable
+    // 2. export default async arrow assigned to variable, or generateMetadata export
     ExportNamedDeclaration(nodePath) {
       const decl = nodePath.node.declaration;
+      if (t.isFunctionDeclaration(decl) && decl.id?.name === 'generateMetadata') {
+        result.hasDynamicMetadata = true;
+        return;
+      }
       if (t.isVariableDeclaration(decl)) {
-        for (const declarator of decl.declarations) {
-          const init = declarator.init;
+        for (const d of decl.declarations) {
           if (
-            (t.isArrowFunctionExpression(init) || t.isFunctionExpression(init)) &&
-            init.async
+            (t.isArrowFunctionExpression(d.init) || t.isFunctionExpression(d.init)) &&
+            d.init.async
           ) {
             result.isDynamic = true;
           }
+          if (
+            t.isIdentifier(d.id, { name: 'generateMetadata' }) &&
+            (t.isArrowFunctionExpression(d.init) || t.isFunctionExpression(d.init))
+          ) {
+            result.hasDynamicMetadata = true;
+          }
         }
+      }
+    },
+
+    // export const metadata = { title: '...', description: '...' }
+    VariableDeclarator(nodePath) {
+      if (!t.isIdentifier(nodePath.node.id, { name: 'metadata' })) return;
+      if (!t.isExportNamedDeclaration(nodePath.parentPath?.parentPath?.node)) return;
+      const init = nodePath.node.init;
+      if (!t.isObjectExpression(init)) return;
+      for (const prop of init.properties) {
+        if (!t.isObjectProperty(prop)) continue;
+        const key = t.isIdentifier(prop.key) ? prop.key.name : null;
+        const val = t.isStringLiteral(prop.value) ? prop.value.value : null;
+        if (!val) continue;
+        if (key === 'title') result.title = val;
+        if (key === 'description') result.description = val;
       }
     },
 
@@ -176,11 +200,6 @@ export async function extractContent(filePath: string): Promise<ExtractedContent
       }
     },
   });
-
-  const meta = extractMetadata(ast);
-  result.title = meta.title;
-  result.description = meta.description;
-  result.hasDynamicMetadata = meta.hasDynamicMetadata;
 
   return result;
 }

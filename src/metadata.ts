@@ -20,6 +20,8 @@ export function extractMetadata(ast: ParseResult<t.File>): PageMetadata {
     // export const metadata = { title: '...', description: '...' }
     VariableDeclarator(nodePath) {
       if (!t.isIdentifier(nodePath.node.id, { name: 'metadata' })) return;
+      // Guard: must be a top-level export const, not a local variable
+      if (!t.isExportNamedDeclaration(nodePath.parentPath?.parentPath?.node)) return;
       const init = nodePath.node.init;
       if (!t.isObjectExpression(init)) return;
 
@@ -33,14 +35,23 @@ export function extractMetadata(ast: ParseResult<t.File>): PageMetadata {
       }
     },
 
-    // export async function generateMetadata({ params }) { ... }
+    // export async function generateMetadata() { ... }
+    // export const generateMetadata = async () => { ... }
     ExportNamedDeclaration(nodePath) {
       const decl = nodePath.node.declaration;
-      if (
-        t.isFunctionDeclaration(decl) &&
-        decl.id?.name === 'generateMetadata'
-      ) {
+      if (t.isFunctionDeclaration(decl) && decl.id?.name === 'generateMetadata') {
         meta.hasDynamicMetadata = true;
+        return;
+      }
+      if (t.isVariableDeclaration(decl)) {
+        for (const d of decl.declarations) {
+          if (
+            t.isIdentifier(d.id, { name: 'generateMetadata' }) &&
+            (t.isArrowFunctionExpression(d.init) || t.isFunctionExpression(d.init))
+          ) {
+            meta.hasDynamicMetadata = true;
+          }
+        }
       }
     },
   });
