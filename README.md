@@ -3,7 +3,7 @@
 Generate AI-readable markdown from your Next.js source — no proxy, no runtime cost.
 
 ```
-npx telo
+npx @ggange/telo
 ```
 
 Produces a `page.md` file alongside every static route and an `llms.txt` index that AI agents can follow, all derived directly from your source code at build time.
@@ -39,7 +39,7 @@ app/
   pricing/page.tsx
 ```
 
-Running `npx telo` writes:
+Running `npx @ggange/telo` writes:
 
 ```
 public/
@@ -80,13 +80,13 @@ AI agents follow the two-hop pattern: fetch `/llms.txt` → follow links to per-
 
 ```bash
 # Run once (no install needed)
-npx telo
+npx @ggange/telo
 
 # Or install globally
-npm install -g telo
+npm install -g @ggange/telo
 
 # Or add to your project
-npm install --save-dev telo
+npm install --save-dev @ggange/telo
 ```
 
 Requires Node.js ≥ 18.
@@ -96,7 +96,7 @@ Requires Node.js ≥ 18.
 ## Usage
 
 ```bash
-npx telo [options]
+npx @ggange/telo [options]
 ```
 
 | Option | Default | Description |
@@ -111,7 +111,7 @@ npx telo [options]
 ```json
 {
   "scripts": {
-    "build": "next build && telo"
+    "build": "next build && npx @ggange/telo"
   }
 }
 ```
@@ -248,7 +248,7 @@ export default async function Page() {
 }
 ```
 
-**The fix:** run `npx telo` once to generate `ai-annotation-guide.md`, then follow its instructions to wrap key content inside your components with `<AIContent>` from `@pkg/react` (coming soon). Once annotated, telo will pick up that content on the next run.
+**The fix:** run `npx @ggange/telo` once to generate `ai-annotation-guide.md`, then follow its instructions to wrap key content inside your components with `<AIContent>` from `@pkg/react` (coming soon). Once annotated, telo will pick up that content on the next run.
 
 **Pages that only call `redirect()` produce empty output.** This is expected — there is no content to extract.
 
