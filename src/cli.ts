@@ -18,7 +18,7 @@ export function parseArgs(argv: string[]): CliFlags {
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--out' && argv[i + 1]) flags.out = argv[++i];
     else if (argv[i] === '--skip-dynamic') flags.skipDynamic = true;
-    else if (argv[i] === '--skip-components' && argv[i + 1]) {
+    else if (argv[i] === '--skip-components' && argv[i + 1] && !argv[i + 1].startsWith('--')) {
       flags.skipComponents = argv[++i].split(',').map(s => s.trim()).filter(Boolean);
     }
     else if (argv[i] === '--help' || argv[i] === '-h') flags.help = true;

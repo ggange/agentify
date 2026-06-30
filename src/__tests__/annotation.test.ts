@@ -131,7 +131,7 @@ describe('scanForAnnotations', () => {
     }
   });
 
-  test('.agentifyignore excludes matching files', async () => {
+  test('.agentifyignore excludes matching files (glob pattern)', async () => {
     const root = await mkFixture({
       'src/Hero.tsx': `export function Hero() { return <HeroSection title="Keep me" />; }`,
       'src/ignored/Nav.tsx': `export function Nav() { return <NavSection title="Exclude me" />; }`,
@@ -155,6 +155,36 @@ describe('scanForAnnotations', () => {
     try {
       const files = await scanForAnnotations(root);
       expect(files.length).toBeGreaterThan(0);
+    } finally {
+      await cleanUp(root);
+    }
+  });
+
+  test('.agentifyignore bare directory path is normalized to glob', async () => {
+    const root = await mkFixture({
+      'src/Hero.tsx': `export function Hero() { return <HeroSection title="Keep me" />; }`,
+      'src/ignored/Nav.tsx': `export function Nav() { return <NavSection title="Exclude me" />; }`,
+      '.agentifyignore': 'src/ignored',
+    });
+    try {
+      const files = await scanForAnnotations(root);
+      const paths = files.map(f => f.filePath);
+      expect(paths.some(p => p.includes('ignored'))).toBe(false);
+      expect(paths.some(p => p.includes('Hero'))).toBe(true);
+    } finally {
+      await cleanUp(root);
+    }
+  });
+
+  test('.agentifyignore trailing-slash directory is normalized to glob', async () => {
+    const root = await mkFixture({
+      'src/Hero.tsx': `export function Hero() { return <HeroSection title="Keep me" />; }`,
+      'src/ignored/Nav.tsx': `export function Nav() { return <NavSection title="Exclude me" />; }`,
+      '.agentifyignore': 'src/ignored/',
+    });
+    try {
+      const files = await scanForAnnotations(root);
+      expect(files.some(f => f.filePath.includes('ignored'))).toBe(false);
     } finally {
       await cleanUp(root);
     }

@@ -36,10 +36,21 @@ const CONTENT_PROPS = new Set([
 async function readAgentifyIgnore(projectRoot: string): Promise<string[]> {
   try {
     const raw = await fs.readFile(path.join(projectRoot, '.agentifyignore'), 'utf-8');
-    return raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    return raw
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l && !l.startsWith('#'))
+      .map(normalizeIgnorePattern);
   } catch {
     return [];
   }
+}
+
+// Bare paths like `lib` or `components/icons/` have no glob metachars and
+// match nothing in fast-glob's ignore array. Normalize them to `dir/**`.
+function normalizeIgnorePattern(pattern: string): string {
+  if (/[*?[\]{]/.test(pattern)) return pattern;
+  return pattern.replace(/\/$/, '') + '/**';
 }
 
 export async function scanForAnnotations(projectRoot: string): Promise<FileAnnotations[]> {

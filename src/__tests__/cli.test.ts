@@ -46,6 +46,12 @@ describe('parseArgs', () => {
   test('--skip-components defaults to empty array', () => {
     expect(parseArgs([]).skipComponents).toEqual([]);
   });
+
+  test('--skip-components does not consume a following flag as its value', () => {
+    const f = parseArgs(['--skip-components', '--out', 'dist']);
+    expect(f.skipComponents).toEqual([]);
+    expect(f.out).toBe('dist');
+  });
 });
 
 describe('run() — App Router', () => {
