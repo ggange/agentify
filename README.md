@@ -259,7 +259,7 @@ export default async function Page() {
 ## Contributing
 
 ```bash
-git clone https://github.com/ggange/agentify
+git clone https://github.com/ggange/telo
 cd telo
 npm install
 npm test       # 70 tests, ~500ms

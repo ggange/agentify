@@ -35,10 +35,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ggange/agentify.git"
+    "url": "git+https://github.com/ggange/telo.git"
   },
-  "homepage": "https://github.com/ggange/agentify#readme",
-  "bugs": "https://github.com/ggange/agentify/issues",
+  "homepage": "https://github.com/ggange/telo#readme",
+  "bugs": "https://github.com/ggange/telo/issues",
   "keywords": [
     "llm",
     "ai",
