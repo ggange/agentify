@@ -33,7 +33,7 @@ export async function run(projectRoot: string, argv: string[]): Promise<void> {
     console.log(`
 telo — generate AI-readable markdown from your Next.js source
 
-Usage: npx telo [options]
+Usage: npx @ggange/telo [options]
 
 Options:
   --out <dir>              Output directory (default: public)
