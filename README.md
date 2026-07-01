@@ -264,7 +264,7 @@ export default async function Page() {
 git clone https://github.com/ggange/telogen
 cd telogen
 npm install
-npm test       # 70 tests, ~500ms
+npm test       # 71 tests, ~600ms
 npm run build  # outputs dist/cli.js
 ```
 

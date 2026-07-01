@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { realpathSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { detectRoutes } from './router.js';
 import { extractContent } from './visitor.js';
@@ -134,8 +135,23 @@ function renderMarkdown(
   return lines.join('\n').trimEnd() + '\n';
 }
 
-// Auto-execute only when run as the main script
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// Auto-execute only when run as the main script.
+// Resolve process.argv[1] through realpath first: when invoked via a bin
+// symlink (how `npx` and global installs work) argv[1] is the symlink path
+// while import.meta.url is the resolved target. Comparing them raw fails and
+// the CLI silently does nothing, so resolve the symlink before comparing.
+function isMainModule(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  const here = fileURLToPath(import.meta.url);
+  try {
+    return realpathSync(entry) === here;
+  } catch {
+    return entry === here;
+  }
+}
+
+if (isMainModule()) {
   run(process.cwd(), process.argv.slice(2)).catch((err) => {
     console.error('telogen:', err.message);
     process.exit(1);
