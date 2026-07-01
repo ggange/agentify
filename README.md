@@ -6,6 +6,8 @@ Generate AI-readable markdown from your Next.js source — no proxy, no runtime 
 npx telogen
 ```
 
+![telogen demo](demo.gif)
+
 Produces a `page.md` file alongside every static route and an `llms.txt` index that AI agents can follow, all derived directly from your source code at build time.
 
 ---
